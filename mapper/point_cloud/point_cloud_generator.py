@@ -18,7 +18,7 @@ class PointCloudGenerator:
         cx=1024 / 2,
         cy=1024 / 2,
     )
-    DEFAULT_MINAS_MAX_DEPTH = 50
+    MINAS_MAX_DEPTH = 50
 
     def __init__(self, depth_estimator: DepthEstimator) -> None:
         self._depth_estimator = depth_estimator
@@ -39,7 +39,7 @@ class PointCloudGenerator:
             rgb_image = Image(image_frame.image)
             depth_image = Image(
                 (
-                    image_frame.depth_map * (255 / self.DEFAULT_MINAS_MAX_DEPTH)
+                    image_frame.depth_map * (255 / self.MINAS_MAX_DEPTH)
                 ).astype("uint8")
             )
             rgbd_image = RGBDImage.create_from_color_and_depth(
