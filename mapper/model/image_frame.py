@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import cv2
@@ -8,7 +9,7 @@ class ImageFrame:
     def __init__(
         self,
         image: np.ndarray,
-        depth_map: np.ndarray,
+        depth_map: Optional[np.ndarray] = None,
     ):
         self.image = image
         self.depth_map = depth_map
