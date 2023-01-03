@@ -1,0 +1,6 @@
+typer~=0.7.0
+numpy~=1.24.1
+opencv-python~=4.7.0.68
+h5py~=3.7.0
+open3d~=0.16.0
+torch~=1.13.1
