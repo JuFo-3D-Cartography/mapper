@@ -1,7 +1,5 @@
-import cv2
 import numpy as np
 import torch
-from matplotlib import pyplot as plt
 
 
 class DepthEstimator:
@@ -23,7 +21,7 @@ class DepthEstimator:
         )
         self._transform: torch.nn.Module = (
             midas_transforms.dpt_transform
-            if self.MODEL_TYPE == "DPT_Large" or self.MODEL_TYPE == "DPT_Hybrid"
+            if self.MODEL_TYPE in ["DPT_Hybrid", "DPT_Large"]
             else midas_transforms.small_transform
         )
 
