@@ -14,17 +14,11 @@ class SensorRecordingsReader:
         sensor_recordings_path: Path,
         sensor_recordings_trajectory: str,
     ) -> Generator[SensorRecording, None, None]:
-        return (
-            SensorRecording(
-                position=position,
-                rotation=rotation,
-            )
-            for position, rotation in zip(
-                *SensorRecordingsReader._read_sensor_recordings(
-                    sensor_recordings_path, sensor_recordings_trajectory
-                )
-            )
+        positions, rotations = SensorRecordingsReader._read_sensor_recordings(
+            sensor_recordings_path, sensor_recordings_trajectory
         )
+        for position, rotation in zip(positions, rotations):
+            yield SensorRecording(position, rotation)
 
     @staticmethod
     def _read_sensor_recordings(
