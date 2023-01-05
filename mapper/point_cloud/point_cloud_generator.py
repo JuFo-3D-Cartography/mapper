@@ -1,11 +1,17 @@
+import math
 from typing import Generator
 
-from open3d.cpu.pybind.camera import PinholeCameraIntrinsic
-from open3d.cpu.pybind.geometry import PointCloud, RGBDImage, Image
+import numpy as np
+from open3d.cpu.pybind.camera import (
+    PinholeCameraIntrinsic,
+)
+from open3d.cpu.pybind.geometry import PointCloud
+from open3d.cpu.pybind.utility import Vector3dVector
 from open3d.cpu.pybind.visualization import draw_geometries
 
 from mapper.depth.depth_estimator import DepthEstimator
 from mapper.model.image_frame import ImageFrame
+from mapper.model.position import Position
 from mapper.model.sensor_recording import SensorRecording
 
 
@@ -18,7 +24,6 @@ class PointCloudGenerator:
         cx=1024 / 2,
         cy=1024 / 2,
     )
-    MINAS_MAX_DEPTH = 50
 
     def __init__(self, depth_estimator: DepthEstimator) -> None:
         self._depth_estimator = depth_estimator
@@ -28,26 +33,85 @@ class PointCloudGenerator:
         image_frame_generator: Generator[ImageFrame, None, None],
         sensor_recording_generator: Generator[SensorRecording, None, None],
     ) -> PointCloud:
-        point_cloud = PointCloud()
+        point_cloud: PointCloud = PointCloud()
         for image_frame, sensor_recording in zip(
             image_frame_generator, sensor_recording_generator
         ):
-            if image_frame.depth_map is None:
-                image_frame.depth_map = self._depth_estimator.estimate_depth(
-                    image_frame.image
+            self._add_estimated_depth_map_to_image_frame_if_missing(image_frame)
+            point_cloud += (
+                self.generate_point_cloud_from_image_frame_and_sensor_recording(
+                    image_frame, sensor_recording
                 )
-            rgb_image = Image(image_frame.image)
-            depth_image = Image(
-                (
-                    image_frame.depth_map * (255 / self.MINAS_MAX_DEPTH)
-                ).astype("uint8")
             )
-            rgbd_image = RGBDImage.create_from_color_and_depth(
-                rgb_image, depth_image, depth_scale=1.0, depth_trunc=50
-            )
-            draw_geometries([rgbd_image], width=600, height=600)
-            # point_cloud += PointCloud.create_from_rgbd_image(
-            #     rgbd_image, self.DEFAULT_MIDAIR_INTRINSICS
-            # )
-            # draw_geometries([point_cloud], width=600, height=600)
+            print("Iteration complete")
         return point_cloud
+
+    def generate_point_cloud_from_image_frame_and_sensor_recording(
+        self, image_frame: ImageFrame, sensor_recording: SensorRecording
+    ) -> PointCloud:
+        point_cloud: PointCloud = PointCloud()
+        for x in range(image_frame.image.shape[0]):
+            for y in range(image_frame.image.shape[1]):
+                depth: float = image_frame.depth_map[x, y]
+                if depth == 0:
+                    continue
+                position: Position = self._get_position_of_midair_pixel(
+                    x, y, depth, sensor_recording
+                )
+                position_array: np.ndarray = np.array(
+                    [position.x, position.y, position.z]
+                )
+                point_cloud.points.append(position_array)
+                point_cloud.colors.append(image_frame.image[x, y] / 255)
+        return point_cloud
+
+    def _get_position_of_midair_pixel(
+        self,
+        x: int,
+        y: int,
+        depth: float,
+        sensor_recording: SensorRecording,
+    ) -> Position:
+        intrinsic: PinholeCameraIntrinsic = self.DEFAULT_MIDAIR_INTRINSICS
+        focal_length: float = intrinsic.width / 2
+        radius: float = depth / math.sqrt(
+            ((x - focal_length) ** 2)
+            + ((y - focal_length) ** 2)
+            + (focal_length ** 2)
+        )
+        camera_frame_position: Position = Position(
+            x=radius * (x - intrinsic.width / 2),
+            y=radius * (y - intrinsic.height / 2),
+            z=radius * focal_length,
+        )
+        body_frame_position: Position = Position(
+            x=camera_frame_position.z,
+            y=camera_frame_position.y,
+            z=camera_frame_position.x,
+        )
+        rotation_matrix: np.ndarray = (
+            sensor_recording.rotation.get_rotation_matrix()
+        )
+        position: Position = Position(
+            x=rotation_matrix[0, 0] * body_frame_position.x
+            + rotation_matrix[0, 1] * body_frame_position.y
+            + rotation_matrix[0, 2] * body_frame_position.z
+            + sensor_recording.position.x,
+            y=rotation_matrix[1, 0] * body_frame_position.x
+            + rotation_matrix[1, 1] * body_frame_position.y
+            + rotation_matrix[1, 2] * body_frame_position.z
+            + sensor_recording.position.y,
+            z=rotation_matrix[2, 0] * body_frame_position.x
+            + rotation_matrix[2, 1] * body_frame_position.y
+            + rotation_matrix[2, 2] * body_frame_position.z
+            + sensor_recording.position.z,
+        )
+        return position
+
+    def _add_estimated_depth_map_to_image_frame_if_missing(
+        self, image_frame: ImageFrame
+    ) -> None:
+        if image_frame.depth_map is None:
+            image_frame.depth_map = self._depth_estimator.estimate_depth(
+                image_frame.image
+            )

@@ -13,10 +13,13 @@ from mapper.validator.cli_path_validator import CliPathValidator
 def validate_path_input(
     sensor_recordings_path: Path,
     image_frames_path: Path,
+    depth_maps_path: Path,
     point_cloud_save_path: Path,
 ) -> None:
     CliPathValidator.validate_file(sensor_recordings_path)
     CliPathValidator.validate_directory(image_frames_path)
+    if depth_maps_path is not None:
+        CliPathValidator.validate_directory(depth_maps_path)
     CliPathValidator.validate_file(point_cloud_save_path)
 
 
@@ -24,15 +27,20 @@ def main(
     sensor_recordings_path: Path = typer.Argument(
         ...,
         help="Path to sensor recordings, the data must in sync with the image "
-        "frames (same number of frames, etc.)",
+        "image_frames (same number of image_frames, etc.)",
     ),
     sensor_recordings_trajectory: str = typer.Option(
         "trajectory_5000", help="Name of the trajectory to use"
     ),
     image_frames_path: Path = typer.Argument(
         ...,
-        help="Path to image frames, the data must in sync with the sensor "
-        "recordings (same number of frames, etc.)",
+        help="Path to image image_frames, the data must in sync with the sensor "
+        "recordings (same number of image_frames, etc.)",
+    ),
+    depth_map_frames_path: Path = typer.Option(
+        None,
+        help="Path to depth maps, if not provided, the depth maps will be "
+        "generated from the image image_frames",
     ),
     point_cloud_save_path: Path = typer.Argument(
         ...,
@@ -43,6 +51,7 @@ def main(
     validate_path_input(
         sensor_recordings_path,
         image_frames_path,
+        depth_map_frames_path,
         point_cloud_save_path,
     )
 
@@ -60,6 +69,7 @@ def main(
         sensor_recordings_path,
         sensor_recordings_trajectory,
         image_frames_path,
+        depth_map_frames_path,
         point_cloud_save_path,
     )
 
