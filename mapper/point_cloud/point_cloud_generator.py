@@ -6,8 +6,6 @@ from open3d.cpu.pybind.camera import (
     PinholeCameraIntrinsic,
 )
 from open3d.cpu.pybind.geometry import PointCloud
-from open3d.cpu.pybind.utility import Vector3dVector
-from open3d.cpu.pybind.visualization import draw_geometries
 
 from mapper.depth.depth_estimator import DepthEstimator
 from mapper.model.image_frame import ImageFrame
