@@ -22,6 +22,7 @@ class PointCloudGenerator:
         cx=1024 / 2,
         cy=1024 / 2,
     )
+    PIXEL_ITERATION_STEP = 10
 
     def __init__(self, depth_estimator: DepthEstimator) -> None:
         self._depth_estimator = depth_estimator
@@ -48,9 +49,11 @@ class PointCloudGenerator:
         self, image_frame: ImageFrame, sensor_recording: SensorRecording
     ) -> PointCloud:
         point_cloud: PointCloud = PointCloud()
-        for x in range(image_frame.image.shape[0]):
-            for y in range(image_frame.image.shape[1]):
-                depth: float = image_frame.depth_map[x, y]
+        depth_map: np.ndarray = image_frame.depth_map
+        image: np.ndarray = image_frame.image
+        for x in range(0, depth_map.shape[0], self.PIXEL_ITERATION_STEP):
+            for y in range(0, depth_map.shape[1], self.PIXEL_ITERATION_STEP):
+                depth: float = depth_map[x, y]
                 if depth == 0:
                     continue
                 position: Position = self._get_position_of_midair_pixel(
@@ -60,15 +63,11 @@ class PointCloudGenerator:
                     [position.x, position.y, position.z]
                 )
                 point_cloud.points.append(position_array)
-                point_cloud.colors.append(image_frame.image[x, y] / 255)
+                point_cloud.colors.append(image[x, y] / 255)
         return point_cloud
 
     def _get_position_of_midair_pixel(
-        self,
-        x: int,
-        y: int,
-        depth: float,
-        sensor_recording: SensorRecording,
+        self, x: int, y: int, depth: float, sensor_recording: SensorRecording
     ) -> Position:
         intrinsic: PinholeCameraIntrinsic = self.DEFAULT_MIDAIR_INTRINSICS
         focal_length: float = intrinsic.width / 2
