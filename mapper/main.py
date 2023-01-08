@@ -65,7 +65,7 @@ def main(
         image_frames_reader, sensor_recordings_reader, point_cloud_generator
     )
 
-    mapping_service.generate_point_cloud_from_midair_data(
+    mapping_service.generate_and_save_point_cloud_from_midair_data(
         sensor_recordings_path,
         sensor_recordings_trajectory,
         image_frames_path,

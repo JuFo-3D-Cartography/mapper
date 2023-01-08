@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from typing import Generator
 from open3d.cpu.pybind.geometry import PointCloud
@@ -22,7 +23,7 @@ class MappingService:
         self._sensor_recordings_reader = sensor_recording_reader
         self._point_cloud_generator = point_cloud_generator
 
-    def generate_point_cloud_from_midair_data(
+    def generate_and_save_point_cloud_from_midair_data(
         self,
         sensor_recordings_path: Path,
         sensor_recordings_trajectory: str,
@@ -41,11 +42,14 @@ class MappingService:
             sensor_recordings_path, sensor_recordings_trajectory
         )
 
+        start_time: float = time.time()
         point_cloud: PointCloud = (
             self._point_cloud_generator.generate_point_cloud(
                 image_frame_generator, sensor_recordings_generator
             )
         )
+        end_time: float = time.time()
+        print(f"Time to generate point cloud: {end_time - start_time} seconds")
 
         write_point_cloud(str(point_cloud_save_path), point_cloud)
         draw_geometries([point_cloud])
