@@ -23,7 +23,7 @@ class PointCloudGenerator:
         cx=1024 / 2,
         cy=1024 / 2,
     )
-    PIXEL_ITERATION_STEP = 20
+    PIXEL_ITERATION_STEP = 10
 
     def __init__(self, depth_estimator: DepthEstimator) -> None:
         self._depth_estimator = depth_estimator
@@ -50,35 +50,19 @@ class PointCloudGenerator:
     ) -> PointCloud:
         depth_map: np.ndarray = image_frame.depth_map
         image: np.ndarray = image_frame.image
-
-        x_range = range(0, depth_map.shape[0], self.PIXEL_ITERATION_STEP)
-        y_range = range(0, depth_map.shape[1], self.PIXEL_ITERATION_STEP)
+        x_range: range = range(0, depth_map.shape[0], self.PIXEL_ITERATION_STEP)
+        y_range: range = range(0, depth_map.shape[1], self.PIXEL_ITERATION_STEP)
         x_coords, y_coords = np.meshgrid(x_range, y_range)
-        x_coords: np.ndarray = x_coords.flatten()
-        y_coords: np.ndarray = y_coords.flatten()
-
-        number_of_points: int = len(x_range) * len(y_range)
-        positions: np.ndarray = np.empty(
-            (number_of_points, 3), dtype=np.float32
-        )
-        colors: np.ndarray = np.empty((number_of_points, 3), dtype=np.float32)
-
         valid_points: np.ndarray = depth_map[x_coords, y_coords] > 0
         x_coords: np.ndarray = x_coords[valid_points]
         y_coords: np.ndarray = y_coords[valid_points]
-
-        positions[valid_points]: list[np.ndarray] = [
+        positions: list[np.ndarray] = [
             self._get_position_of_midair_pixel(x, y, depth, sensor_recording)
             for x, y, depth in zip(
                 x_coords, y_coords, depth_map[x_coords, y_coords]
             )
         ]
-        colors[valid_points]: np.ndarray = image[x_coords, y_coords] / 255
-
-        number_of_valid_points: int = valid_points.sum()
-        positions: np.ndarray = positions[:number_of_valid_points]
-        colors: np.ndarray = colors[:number_of_valid_points]
-
+        colors: np.ndarray = image[x_coords, y_coords] / 255
         point_cloud: PointCloud = PointCloud()
         point_cloud.points = Vector3dVector(positions)
         point_cloud.colors = Vector3dVector(colors)
@@ -88,11 +72,11 @@ class PointCloudGenerator:
         self, x: int, y: int, depth: float, sensor_recording: SensorRecording
     ) -> np.ndarray:
         intrinsic: PinholeCameraIntrinsic = self.DEFAULT_MIDAIR_INTRINSICS
-        focal_length: float = intrinsic.height / 2
+        focal_length: float = intrinsic.width / 2
         ray_length: float = depth / math.sqrt(
             ((x - focal_length) ** 2)
             + ((y - focal_length) ** 2)
-            + (focal_length**2)
+            + (focal_length ** 2)
         )
         camera_frame_position: np.ndarray = np.array(
             [
