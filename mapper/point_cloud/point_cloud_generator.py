@@ -23,9 +23,11 @@ class PointCloudGenerator:
         cx=1024 / 2,
         cy=1024 / 2,
     )
-    PIXEL_ITERATION_STEP = 10
 
-    def __init__(self, depth_estimator: DepthEstimator) -> None:
+    def __init__(
+        self, pixel_iteration_step: int, depth_estimator: DepthEstimator
+    ):
+        self._pixel_iteration_step: int = pixel_iteration_step
         self._depth_estimator = depth_estimator
 
     def generate_point_cloud(
@@ -50,8 +52,12 @@ class PointCloudGenerator:
     ) -> PointCloud:
         depth_map: np.ndarray = image_frame.depth_map
         image: np.ndarray = image_frame.image
-        x_range: range = range(0, depth_map.shape[0], self.PIXEL_ITERATION_STEP)
-        y_range: range = range(0, depth_map.shape[1], self.PIXEL_ITERATION_STEP)
+        x_range: range = range(
+            0, depth_map.shape[0], self._pixel_iteration_step
+        )
+        y_range: range = range(
+            0, depth_map.shape[1], self._pixel_iteration_step
+        )
         x_coords, y_coords = np.meshgrid(x_range, y_range)
         valid_points: np.ndarray = depth_map[x_coords, y_coords] < 100
         x_coords: np.ndarray = x_coords[valid_points]

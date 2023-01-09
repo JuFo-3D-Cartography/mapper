@@ -45,7 +45,8 @@ class MappingService:
         start_time: float = time.time()
         point_cloud: PointCloud = (
             self._point_cloud_generator.generate_point_cloud(
-                image_frame_generator, sensor_recordings_generator
+                image_frame_generator,
+                sensor_recordings_generator,
             )
         )
         end_time: float = time.time()
