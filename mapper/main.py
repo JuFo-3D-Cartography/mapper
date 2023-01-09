@@ -74,11 +74,11 @@ def main(
     )
 
     mapping_service.generate_and_save_point_cloud_from_midair_data(
-        pixel_iteration_step,
         sensor_recordings_path,
         sensor_recordings_trajectory,
         image_frames_path,
         depth_map_frames_path,
+        point_cloud_save_path,
     )
 
 
