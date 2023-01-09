@@ -35,5 +35,5 @@ class SensorRecordingsReader:
                     z=attitude[timestamp][3],
                 ),
             )
-            for timestamp in range(len(position))
+            for timestamp in range(0, len(position), 4)
         )

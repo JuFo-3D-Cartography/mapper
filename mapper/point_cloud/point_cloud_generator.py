@@ -53,7 +53,7 @@ class PointCloudGenerator:
         x_range: range = range(0, depth_map.shape[0], self.PIXEL_ITERATION_STEP)
         y_range: range = range(0, depth_map.shape[1], self.PIXEL_ITERATION_STEP)
         x_coords, y_coords = np.meshgrid(x_range, y_range)
-        valid_points: np.ndarray = depth_map[x_coords, y_coords] > 0
+        valid_points: np.ndarray = depth_map[x_coords, y_coords] < 100
         x_coords: np.ndarray = x_coords[valid_points]
         y_coords: np.ndarray = y_coords[valid_points]
         positions: list[np.ndarray] = [

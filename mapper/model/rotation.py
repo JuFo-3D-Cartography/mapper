@@ -1,5 +1,4 @@
 import numpy as np
-from open3d.cpu.pybind.geometry import get_rotation_matrix_from_quaternion
 
 
 class Rotation:
@@ -10,8 +9,24 @@ class Rotation:
         self.w = w
 
     def get_rotation_matrix(self) -> np.ndarray:
-        return get_rotation_matrix_from_quaternion(
-            [self.x, self.y, self.z, self.w]
+        return np.array(
+            [
+                [
+                    1 - 2 * (self.y ** 2 + self.z ** 2),
+                    2 * (self.x * self.y - self.z * self.w),
+                    2 * (self.x * self.z + self.y * self.w),
+                ],
+                [
+                    2 * (self.x * self.y + self.z * self.w),
+                    1 - 2 * (self.x ** 2 + self.z ** 2),
+                    2 * (self.y * self.z - self.x * self.w),
+                ],
+                [
+                    2 * (self.x * self.z - self.y * self.w),
+                    2 * (self.y * self.z + self.x * self.w),
+                    1 - 2 * (self.x ** 2 + self.y ** 2),
+                ],
+            ]
         )
 
     def __repr__(self) -> str:
