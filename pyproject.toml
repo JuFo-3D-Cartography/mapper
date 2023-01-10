@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "mapper"
+version = "0.0.1"
+description = ""
+authors = ["JuFo-3D-Cartography"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+mapper = "mapper.main:app"
+
+[tool.poetry.dependencies]
+python = "3.9.7"
+typer = { extras = ["all"], version = "^0.7.0" }
+opencv-python = "^4.7.0.68"
+h5py = "^3.7.0"
+open3d = "0.16.0"
+torch = "^1.13.1"
+tqdm = "^4.64.1"
+numpy = "1.24.1"
+Pillow = "^9.4.0"
+timm = "^0.6.12"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

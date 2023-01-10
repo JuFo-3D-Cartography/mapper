@@ -7,7 +7,9 @@ from mapper.point_cloud.point_cloud_generator import PointCloudGenerator
 from mapper.reader.image_frames_reader import ImageFramesReader
 from mapper.reader.sensor_recordings_reader import SensorRecordingsReader
 from mapper.service.mapping_service import MappingService
-from mapper.validator.cli_path_validator import CliInputValidator
+from mapper.validator.cli_input_validator import CliInputValidator
+
+app = typer.Typer()
 
 
 def validate_input(
@@ -25,6 +27,7 @@ def validate_input(
     CliInputValidator.validate_file(point_cloud_save_path)
 
 
+@app.command()
 def main(
     sensor_recordings_trajectory: str = typer.Option(
         "trajectory_5000", help="Name of the trajectory to use"
@@ -36,8 +39,8 @@ def main(
     ),
     pixel_iteration_step: int = typer.Option(
         1,
-        help="Step to iterate over the pixels of the image frames and depth maps "
-        "when generating the point cloud",
+        help="Step to iterate over the pixels of the image frames and depth "
+        "maps when generating the point cloud",
     ),
     sensor_recordings_path: Path = typer.Argument(
         ...,
@@ -83,4 +86,4 @@ def main(
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    app()
