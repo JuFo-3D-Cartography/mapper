@@ -45,6 +45,14 @@ class PointCloudGenerator:
                     image_frame, sensor_recording
                 )
             )
+        rotation_matrix: np.ndarray = (
+            point_cloud.get_rotation_matrix_from_axis_angle((1.5, 1.5, -0.9))
+        )
+        point_cloud.rotate(
+            rotation_matrix,
+            center=(0, 0, 0),
+        )
+
         return point_cloud
 
     def generate_point_cloud_from_image_frame_and_sensor_recording(
@@ -82,7 +90,7 @@ class PointCloudGenerator:
         ray_length: float = depth / math.sqrt(
             ((x - focal_length) ** 2)
             + ((y - focal_length) ** 2)
-            + (focal_length ** 2)
+            + (focal_length**2)
         )
         camera_frame_position: np.ndarray = np.array(
             [
