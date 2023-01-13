@@ -46,11 +46,9 @@ class PointCloudGenerator:
                 )
             )
         rotation_matrix: np.ndarray = (
-            # Rotation matrix for the point cloud
             point_cloud.get_rotation_matrix_from_axis_angle((1.5, 1.5, -0.9))
         )
         point_cloud.rotate(
-            # Rotate the point cloud to make it look better after rendering
             rotation_matrix,
             center=(0, 0, 0),
         )
