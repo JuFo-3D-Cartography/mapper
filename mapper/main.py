@@ -40,6 +40,10 @@ def main(
         help="Step to iterate over the pixels of the image frames and depth "
         "maps when generating the point cloud",
     ),
+    max_number_of_frames: int = typer.Option(
+        None,
+        help="Maximum number of frames to use when generating the point cloud",
+    ),
     sensor_recordings_path: Path = typer.Argument(
         ...,
         help="Path to sensor recordings, the data must in sync with the image "
@@ -54,10 +58,6 @@ def main(
         ...,
         help="Path to save the generated point cloud, the file extension "
         "determines the file format (xyz, xyzn, xyzrgb, pts, ply, pcd)",
-    ),
-    max_number_of_frames: int = typer.Option(
-        None,
-        help="Maximum number of frames to use when generating the point cloud",
     ),
 ) -> None:
     validate_input(
