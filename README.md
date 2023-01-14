@@ -19,3 +19,14 @@ This project is focused on the development of a mapping system for 3D environmen
 - numpy = "1.24.1"
 - Pillow = "^9.4.0"
 - timm = "^0.6.12"
+
+## Installation
+To install follow these steps
+
+## Contributions
+We welcome contributions to this project. If you are interested in contributing, please fork the repository and submit a pull request.
+
+## License
+This project is licensed under the ... License 
+
+# This project is academic purpose only. 
