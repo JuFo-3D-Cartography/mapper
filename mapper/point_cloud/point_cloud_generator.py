@@ -1,4 +1,5 @@
 import math
+from itertools import islice
 from typing import Generator
 
 import numpy as np
@@ -34,10 +35,16 @@ class PointCloudGenerator:
         self,
         image_frame_generator: Generator[ImageFrame, None, None],
         sensor_recording_generator: Generator[SensorRecording, None, None],
+        max_number_of_frames: int,
     ) -> PointCloud:
         point_cloud: PointCloud = PointCloud()
         for image_frame, sensor_recording in tqdm(
-            zip(image_frame_generator, sensor_recording_generator)
+            islice(
+                zip(image_frame_generator, sensor_recording_generator),
+                max_number_of_frames,
+            ),
+            total=max_number_of_frames,
+            desc="Generating point cloud",
         ):
             self._add_estimated_depth_map_to_image_frame_if_missing(image_frame)
             point_cloud += (
@@ -45,6 +52,14 @@ class PointCloudGenerator:
                     image_frame, sensor_recording
                 )
             )
+        rotation_matrix: np.ndarray = (
+            point_cloud.get_rotation_matrix_from_axis_angle((1.5, 1.5, -0.9))
+        )
+        point_cloud.rotate(
+            rotation_matrix,
+            center=(0, 0, 0),
+        )
+
         return point_cloud
 
     def generate_point_cloud_from_image_frame_and_sensor_recording(
