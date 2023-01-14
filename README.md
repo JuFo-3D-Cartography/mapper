@@ -11,7 +11,7 @@ This project is focused on the development of a mapping system for 3D environmen
 - Mapping of Data
 - Visualization of surroundings just from sensor data
 
-## Requirments
+## Requirements
 - python = "3.9.7"
 - typer = { extras = ["all"], version = "^0.7.0" }
 - opencv-python = "^4.7.0.68"
