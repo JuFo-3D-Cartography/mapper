@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Optional
 
 import h5py
 
@@ -11,8 +11,8 @@ from mapper.model.sensor_recording import SensorRecording
 class SensorRecordingsReader:
     @staticmethod
     def read_sensor_recordings(
-            sensor_recordings_path: Path,
-            sensor_recordings_trajectory: str,
+        sensor_recordings_path: Path,
+        sensor_recordings_trajectory: str,
     ) -> Generator[SensorRecording, None, None]:
         sensor_recordings_file = h5py.File(sensor_recordings_path, "r")
         trajectory: h5py.Group = sensor_recordings_file[
