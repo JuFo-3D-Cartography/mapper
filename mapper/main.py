@@ -4,8 +4,6 @@ import typer
 
 from mapper.depth.depth_estimator import DepthEstimator
 from mapper.point_cloud.point_cloud_generator import PointCloudGenerator
-from mapper.reader.image_frames_reader import ImageFramesReader
-from mapper.reader.sensor_recordings_reader import SensorRecordingsReader
 from mapper.service.mapping_service import MappingService
 from mapper.validator.cli_input_validator import CliInputValidator
 
@@ -42,6 +40,10 @@ def main(
         help="Step to iterate over the pixels of the image frames and depth "
         "maps when generating the point cloud",
     ),
+    max_number_of_frames: int = typer.Option(
+        None,
+        help="Maximum number of frames to use when generating the point cloud",
+    ),
     sensor_recordings_path: Path = typer.Argument(
         ...,
         help="Path to sensor recordings, the data must in sync with the image "
@@ -66,15 +68,11 @@ def main(
         point_cloud_save_path,
     )
 
-    image_frames_reader: ImageFramesReader = ImageFramesReader()
-    sensor_recordings_reader: SensorRecordingsReader = SensorRecordingsReader()
     depth_estimator: DepthEstimator = DepthEstimator()
     point_cloud_generator: PointCloudGenerator = PointCloudGenerator(
         pixel_iteration_step, depth_estimator
     )
-    mapping_service: MappingService = MappingService(
-        image_frames_reader, sensor_recordings_reader, point_cloud_generator
-    )
+    mapping_service: MappingService = MappingService(point_cloud_generator)
 
     mapping_service.generate_and_save_point_cloud_from_midair_data(
         sensor_recordings_path,
@@ -82,6 +80,7 @@ def main(
         image_frames_path,
         depth_map_frames_path,
         point_cloud_save_path,
+        max_number_of_frames,
     )
 
 
