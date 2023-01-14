@@ -1,7 +1,8 @@
 import time
 from pathlib import Path
-from typing import Generator, Optional
-from open3d.cpu.pybind.geometry import PointCloud, Octree
+from typing import Generator
+
+from open3d.cpu.pybind.geometry import PointCloud
 from open3d.cpu.pybind.io import write_point_cloud
 from open3d.cpu.pybind.visualization import draw_geometries
 
