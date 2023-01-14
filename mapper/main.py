@@ -28,7 +28,7 @@ def validate_input(
 @app.command()
 def main(
     sensor_recordings_trajectory: str = typer.Option(
-        "trajectory_5000", help="Name of the trajectory to use"
+        None, help="Name of the trajectory to use"
     ),
     depth_map_frames_path: Path = typer.Option(
         None,
