@@ -45,7 +45,7 @@ def validate_single_frame_mapping_input(
 @app.command()
 def map_midair(
     sensor_recordings_trajectory: str = typer.Option(
-        "trajectory_5000", help="Name of the trajectory to use"
+        None, help="Name of the trajectory to use"
     ),
     depth_map_frames_path: Path = typer.Option(
         None,
