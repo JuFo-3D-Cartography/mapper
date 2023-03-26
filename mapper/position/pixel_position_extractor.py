@@ -16,4 +16,4 @@ class PixelPositionExtractor:
         sensor_recording: SensorRecording,
         camera_intrinsic: PinholeCameraIntrinsic,
     ) -> np.ndarray:
-        pass
+        raise NotImplementedError

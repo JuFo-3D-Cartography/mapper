@@ -6,4 +6,4 @@ import numpy as np
 class DepthEstimator:
     @abstractmethod
     def estimate_depth(self, image: np.ndarray) -> np.ndarray:
-        pass
+        raise NotImplementedError
