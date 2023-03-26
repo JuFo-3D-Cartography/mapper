@@ -2,15 +2,22 @@ from pathlib import Path
 
 import typer
 
-from mapper.depth.depth_estimator import DepthEstimator
+from mapper.depth.midas_depth_estimator import MidasDepthEstimator
+from mapper.depth.zoe_depth_estimator import ZoeDepthEstimator
 from mapper.point_cloud.point_cloud_generator import PointCloudGenerator
+from mapper.position.midair_pixel_position_extractor import (
+    MidAirPixelPositionExtractor,
+)
+from mapper.position.zoe_pixel_position_extractor import (
+    ZoePixelPositionExtractor,
+)
 from mapper.service.mapping_service import MappingService
 from mapper.validator.cli_input_validator import CliInputValidator
 
 app = typer.Typer()
 
 
-def validate_input(
+def validate_midair_mapping_input(
     pixel_iteration_step: int,
     sensor_recordings_path: Path,
     image_frames_path: Path,
@@ -25,8 +32,18 @@ def validate_input(
     CliInputValidator.validate_file(point_cloud_save_path)
 
 
+def validate_single_frame_mapping_input(
+    pixel_iteration_step: int,
+    image_frame_path: Path,
+    point_cloud_save_path: Path,
+) -> None:
+    CliInputValidator.validate_pixel_iteration_step(pixel_iteration_step)
+    CliInputValidator.validate_file(image_frame_path)
+    CliInputValidator.validate_file(point_cloud_save_path)
+
+
 @app.command()
-def main(
+def map_midair(
     sensor_recordings_trajectory: str = typer.Option(
         "trajectory_5000", help="Name of the trajectory to use"
     ),
@@ -60,7 +77,7 @@ def main(
         "determines the file format (xyz, xyzn, xyzrgb, pts, ply, pcd)",
     ),
 ) -> None:
-    validate_input(
+    validate_midair_mapping_input(
         pixel_iteration_step,
         sensor_recordings_path,
         image_frames_path,
@@ -68,9 +85,12 @@ def main(
         point_cloud_save_path,
     )
 
-    depth_estimator: DepthEstimator = DepthEstimator()
+    depth_estimator: MidasDepthEstimator = MidasDepthEstimator()
+    midair_pixel_position_extractor: MidAirPixelPositionExtractor = (
+        MidAirPixelPositionExtractor()
+    )
     point_cloud_generator: PointCloudGenerator = PointCloudGenerator(
-        pixel_iteration_step, depth_estimator
+        pixel_iteration_step, depth_estimator, midair_pixel_position_extractor
     )
     mapping_service: MappingService = MappingService(point_cloud_generator)
 
@@ -81,6 +101,41 @@ def main(
         depth_map_frames_path,
         point_cloud_save_path,
         max_number_of_frames,
+    )
+
+
+@app.command()
+def map_single_frame(
+    pixel_iteration_step: int = typer.Option(
+        1,
+        help="Step to iterate over the pixels of the image frames and depth "
+        "maps when generating the point cloud",
+    ),
+    image_frame_path: Path = typer.Argument(
+        ...,
+        help="Path to the single image frame",
+    ),
+    point_cloud_save_path: Path = typer.Argument(
+        ...,
+        help="Path to save the generated point cloud, the file extension "
+        "determines the file format (xyz, xyzn, xyzrgb, pts, ply, pcd)",
+    ),
+) -> None:
+    validate_single_frame_mapping_input(
+        pixel_iteration_step, image_frame_path, point_cloud_save_path
+    )
+
+    depth_estimator: ZoeDepthEstimator = ZoeDepthEstimator()
+    zoe_pixel_position_extractor: ZoePixelPositionExtractor = (
+        ZoePixelPositionExtractor()
+    )
+    point_cloud_generator: PointCloudGenerator = PointCloudGenerator(
+        2, depth_estimator, zoe_pixel_position_extractor
+    )
+    mapping_service: MappingService = MappingService(point_cloud_generator)
+
+    mapping_service.generate_and_save_point_cloud_from_single_frame(
+        image_frame_path, point_cloud_save_path
     )
 
 

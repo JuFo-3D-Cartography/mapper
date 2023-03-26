@@ -1,12 +1,17 @@
 import time
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Any
+
+import numpy as np
+from PIL import Image
 
 from open3d.cpu.pybind.geometry import PointCloud
 from open3d.cpu.pybind.io import write_point_cloud
 from open3d.cpu.pybind.visualization import draw_geometries
 
 from mapper.model.image_frame import ImageFrame
+from mapper.model.position import Position
+from mapper.model.rotation import Rotation
 from mapper.model.sensor_recording import SensorRecording
 from mapper.point_cloud.point_cloud_generator import PointCloudGenerator
 from mapper.reader.image_frames_reader import ImageFramesReader
@@ -51,6 +56,44 @@ class MappingService:
         )
         end_time: float = time.time()
         print(f"Time to generate point cloud: {end_time - start_time} seconds")
+
+        write_point_cloud(str(point_cloud_save_path), point_cloud)
+        draw_geometries([point_cloud])
+
+    def generate_and_save_point_cloud_from_single_frame(
+        self,
+        image_frame_path: Path,
+        point_cloud_save_path: Path,
+    ) -> None:
+        image: Any = Image.open(image_frame_path).convert("RGB")
+        image_frame_generator: Generator[ImageFrame, None, None] = (
+            ImageFrame(np.asarray(image), None) for _ in range(1)
+        )
+
+        sensor_recordings_generator: Generator[SensorRecording, None, None] = (
+            SensorRecording(
+                Position(
+                    x=0.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+                Rotation(
+                    x=0.0,
+                    y=0.0,
+                    z=0.0,
+                    w=1.0,
+                ),
+            )
+            for _ in range(1)
+        )
+
+        point_cloud: PointCloud = (
+            self._point_cloud_generator.generate_point_cloud(
+                image_frame_generator,
+                sensor_recordings_generator,
+                1,
+            )
+        )
 
         write_point_cloud(str(point_cloud_save_path), point_cloud)
         draw_geometries([point_cloud])

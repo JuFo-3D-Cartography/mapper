@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator
 
 import h5py
 

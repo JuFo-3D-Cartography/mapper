@@ -1,4 +1,3 @@
-import math
 from itertools import islice
 from typing import Generator
 
@@ -13,23 +12,30 @@ from tqdm import tqdm
 from mapper.depth.depth_estimator import DepthEstimator
 from mapper.model.image_frame import ImageFrame
 from mapper.model.sensor_recording import SensorRecording
+from mapper.position.pixel_position_extractor import PixelPositionExtractor
 
 
 class PointCloudGenerator:
+    IMAGE_WIDTH: int = 1024
+    IMAGE_HEIGHT: int = 1024
     DEFAULT_MIDAIR_INTRINSICS = PinholeCameraIntrinsic(
-        width=1024,
-        height=1024,
-        fx=1024 / 2,
-        fy=1024 / 2,
-        cx=1024 / 2,
-        cy=1024 / 2,
+        width=IMAGE_WIDTH,
+        height=IMAGE_HEIGHT,
+        fx=IMAGE_WIDTH / 2,
+        fy=IMAGE_HEIGHT / 2,
+        cx=IMAGE_WIDTH / 2,
+        cy=IMAGE_HEIGHT / 2,
     )
 
     def __init__(
-        self, pixel_iteration_step: int, depth_estimator: DepthEstimator
+        self,
+        pixel_iteration_step: int,
+        depth_estimator: DepthEstimator,
+        pixel_position_extractor: PixelPositionExtractor,
     ):
         self._pixel_iteration_step: int = pixel_iteration_step
         self._depth_estimator = depth_estimator
+        self._pixel_position_extractor = pixel_position_extractor
 
     def generate_point_cloud(
         self,
@@ -59,7 +65,6 @@ class PointCloudGenerator:
             rotation_matrix,
             center=(0, 0, 0),
         )
-
         return point_cloud
 
     def generate_point_cloud_from_image_frame_and_sensor_recording(
@@ -78,7 +83,9 @@ class PointCloudGenerator:
         x_coords: np.ndarray = x_coords[valid_points]
         y_coords: np.ndarray = y_coords[valid_points]
         positions: list[np.ndarray] = [
-            self._get_position_of_midair_pixel(x, y, depth, sensor_recording)
+            self._pixel_position_extractor.get_position_of_pixel(
+                x, y, depth, sensor_recording, self.DEFAULT_MIDAIR_INTRINSICS
+            )
             for x, y, depth in zip(
                 x_coords, y_coords, depth_map[x_coords, y_coords]
             )
@@ -88,38 +95,6 @@ class PointCloudGenerator:
         point_cloud.points = Vector3dVector(positions)
         point_cloud.colors = Vector3dVector(colors)
         return point_cloud
-
-    def _get_position_of_midair_pixel(
-        self, x: int, y: int, depth: float, sensor_recording: SensorRecording
-    ) -> np.ndarray:
-        intrinsic: PinholeCameraIntrinsic = self.DEFAULT_MIDAIR_INTRINSICS
-        focal_length: float = intrinsic.width / 2
-        ray_length: float = depth / math.sqrt(
-            ((x - focal_length) ** 2)
-            + ((y - focal_length) ** 2)
-            + (focal_length ** 2)
-        )
-        camera_frame_position: np.ndarray = np.array(
-            [
-                ray_length * (x - focal_length),
-                ray_length * (y - focal_length),
-                ray_length * focal_length,
-            ]
-        )
-        body_frame_position: np.ndarray = camera_frame_position[[2, 1, 0]]
-        rotation_matrix: np.ndarray = (
-            sensor_recording.rotation.get_rotation_matrix()
-        )
-        position: np.ndarray = rotation_matrix.dot(
-            body_frame_position
-        ) + np.array(
-            [
-                sensor_recording.position.x,
-                sensor_recording.position.y,
-                sensor_recording.position.z,
-            ]
-        )
-        return position
 
     def _add_estimated_depth_map_to_image_frame_if_missing(
         self, image_frame: ImageFrame
