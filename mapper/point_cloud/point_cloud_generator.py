@@ -32,7 +32,7 @@ class PointCloudGenerator:
         pixel_iteration_step: int,
         depth_estimator: DepthEstimator,
         pixel_position_extractor: PixelPositionExtractor,
-    ):
+    ) -> None:
         self._pixel_iteration_step: int = pixel_iteration_step
         self._depth_estimator = depth_estimator
         self._pixel_position_extractor = pixel_position_extractor

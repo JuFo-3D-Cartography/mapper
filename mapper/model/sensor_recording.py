@@ -7,7 +7,7 @@ class SensorRecording:
         self,
         position: Position,
         rotation: Rotation,
-    ):
+    ) -> None:
         self.position = position
         self.rotation = rotation
 

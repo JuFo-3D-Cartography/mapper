@@ -9,7 +9,7 @@ readme = "README.md"
 mapper = "mapper.main:app"
 
 [tool.poetry.dependencies]
-python = "3.9.7"
+python = "^3.9"
 typer = { extras = ["all"], version = "^0.7.0" }
 opencv-python = "^4.7.0.72"
 h5py = "^3.8.0"

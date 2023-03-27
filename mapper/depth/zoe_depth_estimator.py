@@ -19,5 +19,4 @@ class ZoeDepthEstimator(DepthEstimator):
 
     def estimate_depth(self, image: np.ndarray) -> np.ndarray:
         image: Image = Image.fromarray(image)
-        depth_map: np.ndarray = self._zoedepth.infer_pil(image)
-        return depth_map
+        return self._zoedepth.infer_pil(image)
