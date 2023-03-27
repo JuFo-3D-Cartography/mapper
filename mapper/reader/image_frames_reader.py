@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Any
 
 import cv2
 import numpy as np
@@ -15,7 +15,7 @@ class ImageFramesReader:
         depth_map_frames_path: Path,
     ) -> Generator[ImageFrame, None, None]:
         def read_depth_map(depth_map_path: Path) -> np.ndarray:
-            depth_map_image: Image = Image.open(depth_map_path)
+            depth_map_image: Any = Image.open(depth_map_path)
             depth_map: np.ndarray = np.asarray(depth_map_image, np.uint16)
             depth_map.dtype = np.float16
             return depth_map

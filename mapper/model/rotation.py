@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Rotation:
-    def __init__(self, x: float, y: float, z: float, w: float):
+    def __init__(self, x: float, y: float, z: float, w: float) -> None:
         self.x = x
         self.y = y
         self.z = z
@@ -12,19 +12,19 @@ class Rotation:
         return np.array(
             [
                 [
-                    1 - 2 * (self.y ** 2 + self.z ** 2),
+                    1 - 2 * (self.y**2 + self.z**2),
                     2 * (self.x * self.y - self.z * self.w),
                     2 * (self.x * self.z + self.y * self.w),
                 ],
                 [
                     2 * (self.x * self.y + self.z * self.w),
-                    1 - 2 * (self.x ** 2 + self.z ** 2),
+                    1 - 2 * (self.x**2 + self.z**2),
                     2 * (self.y * self.z - self.x * self.w),
                 ],
                 [
                     2 * (self.x * self.z - self.y * self.w),
                     2 * (self.y * self.z + self.x * self.w),
-                    1 - 2 * (self.x ** 2 + self.y ** 2),
+                    1 - 2 * (self.x**2 + self.y**2),
                 ],
             ]
         )

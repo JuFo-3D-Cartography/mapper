@@ -10,7 +10,7 @@ class ImageFrame:
         self,
         image: np.ndarray,
         depth_map: Optional[np.ndarray] = None,
-    ):
+    ) -> None:
         self.image = image
         self.depth_map = depth_map
 
